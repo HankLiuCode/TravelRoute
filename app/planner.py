@@ -1,3 +1,4 @@
+from typing import List
 from copy import deepcopy
 
 from .plan import Plan
@@ -5,10 +6,10 @@ from .attraction import AttractionSet, Attraction
 from .distance_calculator import DistanceCalculator
 
 class Planner:
-    def __init__(self, distance_calculator):
+    def __init__(self, distance_calculator: DistanceCalculator):
         self.distance_calculator = distance_calculator
     
-    def generate_plans(self, attractions, day_durations, start_date_str, end_date_str):
+    def generate_plans(self, attractions: List[Attraction], day_durations, start_date_str: str, end_date_str: str):
         result = []
         current_plan = Plan(self.distance_calculator, day_durations, start_date_str, end_date_str)
         visited = AttractionSet()

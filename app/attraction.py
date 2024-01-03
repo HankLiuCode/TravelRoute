@@ -1,6 +1,6 @@
 from .opening_hours import WeekOpeningHours
 from .opening_hours import OpeningHours
-from .date import Date
+from .time import Time
 
 class AttractionSet:
     def __init__(self, attractions = []):
@@ -26,7 +26,7 @@ class AttractionSet:
         return f'{self.attraction_ids}'
 
 class Attraction:
-    def __init__(self, attraction_id, stay_time, opening_hours):
+    def __init__(self, attraction_id: int, stay_time: Time, opening_hours: list):
         self.id = attraction_id
         self.stay_time = stay_time
         self.week_opening_hours = WeekOpeningHours(opening_hours)

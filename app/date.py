@@ -10,7 +10,7 @@ class Date:
         "Friday": 5,
         "Saturday": 6
     }
-    def __init__(self, date_string):
+    def __init__(self, date_string: str):
         self.date_string = date_string
 
     def day_of_week(self):

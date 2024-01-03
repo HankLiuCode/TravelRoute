@@ -1,5 +1,9 @@
+from typing import List
+from .attraction import Attraction
+from .time import Time
+
 class DistanceCalculator:
-    def __init__(self, attractions, matrix):
+    def __init__(self, attractions: List[Attraction], matrix: List[List[Time]]):
         ROWS, COLS = len(matrix), len(matrix[0])
         if ROWS != COLS: raise Exception("Invalid matrix")
         if ROWS != len(attractions): raise Exception("Attraction and Matrix doesn't match")

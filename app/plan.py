@@ -1,13 +1,16 @@
-from .day_plan import DayPlan
+from typing import List
 from .date import Date
 from .opening_hours import OpeningHours, WeekOpeningHours
 from .distance_calculator import DistanceCalculator
+from .visit_duration import VisitDuration
+from .attraction import Attraction
+from .time import Time
 
 class Plan:
     DEFAULT_START = 8
     DEFAULT_END = 16
     
-    def __init__(self, distance_calculator: DistanceCalculator, day_durations, date_start_str:str, date_end_str):
+    def __init__(self, distance_calculator: DistanceCalculator, day_durations: List[tuple], date_start_str: str, date_end_str: str):
         self.date_start = Date(date_start_str)
         self.date_end = Date(date_end_str)
         
@@ -52,3 +55,58 @@ class Plan:
     
     def to_tuple(self):
         return tuple(day_plan.to_tuple() for day_plan in self.day_plans)
+
+class DayPlan:
+    def __init__(self, start: Time, end: Time, day: int, parent_plan: Plan):
+        self.start = start
+        self.end = end
+        self.day = day
+        self.plan = parent_plan
+        self.distance_calculator = self.plan.distance_calculator
+        self.visit_durations = []
+
+    def _opening_hours(self, attraction: Attraction):
+        return self.plan.opening_hours(attraction)
+
+    def _start_time(self, attraction: Attraction):
+        day_start = self.visit_durations[-1].end if self.visit_durations else self.start
+        start_time = max(day_start, self._opening_hours(attraction).on(self.day).start)
+        return start_time
+
+    # Note that relationship between
+    # - self.start self.end
+    # - attraction.opening_hours
+    # - travel time between attractions
+    # is quite complicated
+    # this version of adding travel time may be buggy
+    def can_append_attraction(self, attraction: Attraction):
+        start_time = self._start_time(attraction)
+        if self.visit_durations:
+            start_time += self.distance_calculator.calculate(self.visit_durations[-1].attraction, attraction)
+        
+        # day related constraints
+        pass_bed_time = start_time + attraction.stay_time > self.end
+
+        # attraction related constraints
+        not_enough_time = start_time + attraction.stay_time > self._opening_hours(attraction).on(self.day).end
+
+        if pass_bed_time or not_enough_time: return False
+
+        return True
+
+    def append_attraction(self, attraction: Attraction):
+        start_time = self._start_time(attraction)
+        if self.visit_durations:
+            start_time += self.distance_calculator.calculate(self.visit_durations[-1].attraction, attraction)
+        visit_duration = VisitDuration(start_time, attraction)
+        self.visit_durations.append(visit_duration)
+
+    def pop_attraction(self):
+        self.visit_durations.pop()
+    
+    def __str__(self):
+        attraction_strs = [visit_duration.__str__() for visit_duration in self.visit_durations]
+        return f'Day {self.day}: {attraction_strs}'
+    
+    def to_tuple(self):
+        return tuple(visit_duration.to_tuple() for visit_duration in self.visit_durations)

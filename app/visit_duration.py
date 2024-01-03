@@ -1,5 +1,8 @@
+from .time import Time
+from .attraction import Attraction
+
 class VisitDuration:
-    def __init__(self, start, attraction):
+    def __init__(self, start: Time, attraction: Attraction):
         self.start = start
         self.end = start + attraction.stay_time
         self.attraction = attraction
